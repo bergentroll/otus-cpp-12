@@ -13,7 +13,7 @@ public:
   packSize(packSize), stream(stream) { commands.reserve(packSize); }
 
   // TODO Lexeme.
-  Parser* operator <<(std::string const &token) {
+  Parser& operator <<(std::string const &token) {
     if (token == "{") {
       if (state == State::plain) {
         if (commands.size() > 0) flushCommands();
@@ -34,7 +34,7 @@ public:
     else if (state == State::block) s = "BLOCK";
     std::cerr << s << ", size: " << commands.size() << std::endl;
 
-    return this;
+    return *this;
   }
 
 private:

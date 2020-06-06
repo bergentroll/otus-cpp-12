@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SRC_PATH "src/")
 set(TEST_PATH "test/")
+set(GTEST_SRCDIR "/usr/src/gtest/")
 include_directories("inc/")
 
 ### Main targets ##############################################################
