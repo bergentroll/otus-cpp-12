@@ -42,12 +42,16 @@ TEST(bulk, nested_blocks) {
 
   p << "{" << "cmd1" << "{" << "cmd2" << "}" << "cmd3" << "}";
   EXPECT_EQ(ss.str(), "bulk: cmd1, cmd2, cmd3\n");
+  EXPECT_EQ(p.getState(), State::plain);
   ss.str("");
 
-  p
-    << "{" << "cmd1"
-    << "{" << "cmd2"
-    << "{" << "cmd3" << "}" << "}" << "cmd4" << "}";
+  p << "{" << "cmd1";
+  EXPECT_EQ(p.getState(), State::block);
+  p  << "{" << "cmd2";
+  EXPECT_EQ(p.getState(), State::nested);
+  p << "{" << "cmd3" << "}" << "}";
+  EXPECT_EQ(p.getState(), State::block);
+  p << "cmd4" << "}";
   EXPECT_EQ(ss.str(), "bulk: cmd1, cmd2, cmd3, cmd4\n");
   ss.str("");
 

@@ -13,32 +13,39 @@ public:
   packSize(packSize), stream(stream) { commands.reserve(packSize); }
 
   // TODO Lexeme.
+  // TODO Verification.
   Parser& operator <<(std::string const &token) {
     if (token == "{") {
       if (state == State::plain) {
         if (commands.size() > 0) flushCommands();
         state = State::block;
+      } else if (state == State::block) {
+        state = State::nested;
+        ++nestingLevel;
+      } else if (state == State::nested) {
+        ++nestingLevel;
       }
     } else if (token == "}") {
       if (state == State::block) {
         if (commands.size() > 0) flushCommands();
         state = State::plain;
+      } else if (state == State::nested) {
+        --nestingLevel;
+        if (nestingLevel == 0) state = State::block;
       }
     } else {
       commands.push_back(token);
       if (state == State::plain && commands.size() >= packSize) flushCommands();
     }
 
-    std::string s;
-    if (state == State::plain) s = "PLAIN";
-    else if (state == State::block) s = "BLOCK";
-    std::cerr << s << ", size: " << commands.size() << std::endl;
-
     return *this;
   }
 
+  State getState() { return state; }
+
 private:
   State state { State::plain };
+  int nestingLevel { };
   std::size_t const packSize;
   std::ostream &stream;
   std::vector<std::string> commands;
