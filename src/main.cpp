@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <cstring>
 
+#include "parser.hpp"
+
 using namespace std;
 
 class InvalidArgument: public std::logic_error
@@ -43,6 +45,14 @@ int main(int argc, char *argv[]) {
   } catch (InvalidArgument &e) {
     cerr << "Usage error: " << e.what() << endl;
     return EXIT_FAILURE;
+  }
+
+  Parser parser { N };
+  string buf { };
+
+  while (true) {
+    cin >> buf;
+    parser << buf;
   }
 
   return EXIT_SUCCESS;
