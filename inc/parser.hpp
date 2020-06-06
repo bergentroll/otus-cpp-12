@@ -5,21 +5,40 @@
 #include <string>
 #include <vector>
 
-enum class State { root, block };
+enum class State { plain, block, nested };
 
 class Parser {
 public:
   Parser(int packSize, std::ostream &stream = std::cout):
   packSize(packSize), stream(stream) { commands.reserve(packSize); }
 
-  Parser* operator <<(std::string const &input) {
-    commands.push_back(input);
-    if (commands.size() == packSize) flushCommands();
+  // TODO Lexeme.
+  Parser* operator <<(std::string const &token) {
+    if (token == "{") {
+      if (state == State::plain) {
+        if (commands.size() > 0) flushCommands();
+        state = State::block;
+      }
+    } else if (token == "}") {
+      if (state == State::block) {
+        if (commands.size() > 0) flushCommands();
+        state = State::plain;
+      }
+    } else {
+      commands.push_back(token);
+      if (state == State::plain && commands.size() >= packSize) flushCommands();
+    }
+
+    std::string s;
+    if (state == State::plain) s = "PLAIN";
+    else if (state == State::block) s = "BLOCK";
+    std::cerr << s << ", size: " << commands.size() << std::endl;
+
     return this;
   }
 
 private:
-  State state { State::root };
+  State state { State::plain };
   std::size_t const packSize;
   std::ostream &stream;
   std::vector<std::string> commands;
