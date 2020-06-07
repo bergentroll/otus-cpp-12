@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
   Parser parser { N };
   string buf { };
 
-  while (true) {
+  while (!cin.eof()) {
     cin >> buf;
     parser << buf;
   }
