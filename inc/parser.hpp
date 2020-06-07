@@ -29,6 +29,8 @@ private:
 
   class Handler {
   public:
+    virtual ~Handler() = default;
+
     [[ nodiscard ]]
     virtual HandlerPtr readToken(std::string const & token) = 0;
   };
