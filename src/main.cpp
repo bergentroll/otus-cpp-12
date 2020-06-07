@@ -6,8 +6,7 @@
 
 using namespace std;
 
-class InvalidArgument: public std::logic_error
-{
+class InvalidArgument: public std::logic_error {
 public:
   explicit InvalidArgument(const std::string &input):
   std::logic_error(input) { }
