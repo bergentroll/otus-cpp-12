@@ -1,5 +1,5 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef PARSER_HPP
+#define PARSER_HPP
 
 #include <iostream>
 #include <memory>
