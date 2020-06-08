@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "parser.hpp"
+#include "tee_buffer.hpp"
 
 using namespace std;
 
@@ -48,7 +49,9 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  Parser parser { N };
+  TeeBuffer teeBuffer { };
+  ostream stream { &teeBuffer };
+  Parser parser { N, stream };
   string buf { };
 
   while (!cin.eof()) {
