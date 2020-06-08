@@ -1,6 +1,7 @@
 #ifndef TEE_BUFFER_HPP
 #define TEE_BUFFER_HPP
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -14,7 +15,11 @@ public:
   }
 
   TeeBuffer() {
-    std::filesystem::path const path = "file.txt";
+    auto now {
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
+    };
+
+    std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
     file = std::ofstream(path);
   }
 
