@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
+#include <limits>
 
 #include "parser.hpp"
+#include "get_arg.hpp"
 
 using namespace std;
 
@@ -62,6 +64,38 @@ TEST(bulk, invalid_token) {
 
   p << "cmd1" << "{" << "cmd2" << "}";
   EXPECT_THROW(p << "}", Parser::InvalidToken);
+}
+
+TEST(get_arg, valid) {
+  char const *v[] { "bulk", "345" };
+  EXPECT_EQ(345, get_arg(2, v));
+}
+
+TEST(get_arg, invalid_argc) {
+  char const *v1[] { "bulk" };
+  EXPECT_THROW(get_arg(1, v1), InvalidArgument);
+
+  char const *v2[] { "bulk", "345", "-h" };
+  EXPECT_THROW(get_arg(3, v2), InvalidArgument);
+}
+
+TEST(get_arg, invalid_arg) {
+  char const *v[] { "bulk", "a345" };
+  EXPECT_THROW(get_arg(2, v), InvalidArgument);
+
+  v[1] = "3a45";
+  EXPECT_THROW(get_arg(2, v), InvalidArgument);
+
+  v[1] = "345a";
+  EXPECT_THROW(get_arg(2, v), InvalidArgument);
+}
+
+TEST(get_arg, out_of_range) {
+  char const *v[] { "bulk", "-345" };
+  EXPECT_THROW(get_arg(2, v), InvalidArgument);
+
+  v[1] = to_string(numeric_limits<int>::max() + 1).c_str();
+  EXPECT_THROW(get_arg(2, v), InvalidArgument);
 }
 
 int main(int argc, char** argv) {

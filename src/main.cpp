@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char const *argv[]) {
   int N;
   try {
     N = get_arg(argc, argv);
