@@ -94,7 +94,7 @@ TEST(get_arg, out_of_range) {
   char const *v[] { "bulk", "-345" };
   EXPECT_THROW(get_arg(2, v), InvalidArgument);
 
-  v[1] = to_string(numeric_limits<int>::max() + 1).c_str();
+  v[1] = to_string(static_cast<long>(numeric_limits<int>::max()) + 1).c_str();
   EXPECT_THROW(get_arg(2, v), InvalidArgument);
 }
 

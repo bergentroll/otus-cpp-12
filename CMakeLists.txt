@@ -8,6 +8,7 @@ endif()
 project(bulk VERSION ${VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ### Dependencies ##############################################################
 
@@ -19,6 +20,7 @@ include_directories("inc/")
 ### Main targets ##############################################################
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} stdc++fs)
 
 ### Tests #####################################################################
 
