@@ -10,7 +10,6 @@ public:
   std::logic_error(input) { }
 };
 
-// TODO Test.
 int get_arg(int argc, char const *argv[]) {
   int N;
   size_t idx;

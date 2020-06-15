@@ -22,7 +22,12 @@ int main(int argc, char const *argv[]) {
 
   while (!cin.eof()) {
     cin >> buf;
-    parser << buf;
+    try {
+      parser << buf;
+    }
+    catch (Parser::InvalidToken &e) {
+      cerr << "Error occured: " << e.what() << endl;
+    }
   }
 
   return EXIT_SUCCESS;
