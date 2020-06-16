@@ -17,10 +17,6 @@ namespace otus {
       closeFile();
     }
 
-    TeeBuffer() {
-      nextFile();
-    }
-
     int sync() override {
       std::cout << str();
       file << str();
@@ -34,7 +30,7 @@ namespace otus {
     }
 
   private:
-    std::ofstream file;
+    std::ofstream file { };
 
     void nextFile() {
       auto now {

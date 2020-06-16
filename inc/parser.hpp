@@ -26,6 +26,8 @@ namespace otus {
       return *this;
     }
 
+    size_t getBufferSize() { return commands.size(); }
+
   private:
     class Handler; class Plain; class Block; class Nested;
     using HandlerPtr = std::unique_ptr<Handler>;
@@ -43,15 +45,15 @@ namespace otus {
 
       HandlerPtr readToken(std::string const & token) override {
         if (token == "{") {
-            if (parser.commands.size() > 0) parser.flushCommands();
-            parser.notify();
+            if (parser.getBufferSize() > 0) parser.flushCommands();
             return HandlerPtr(new Block(parser));
         }
         else if (token == "}") {
           throw InvalidToken(token);
         } else {
+          if (parser.getBufferSize() == 0) parser.notify();
           parser.commands.push_back(token);
-          if (parser.commands.size() >= parser.packSize) parser.flushCommands();
+          if (parser.getBufferSize() >= parser.packSize) parser.flushCommands();
         }
         return HandlerPtr(new Plain(parser));
       }
@@ -68,10 +70,10 @@ namespace otus {
         if (token == "{") {
           return HandlerPtr(new Nested(parser, 1));
         } else if (token == "}") {
-          if (parser.commands.size() > 0) parser.flushCommands();
-          parser.notify();
+          if (parser.getBufferSize() > 0) parser.flushCommands();
           return HandlerPtr(new Plain(parser));
       } else {
+          if (parser.getBufferSize() == 0) parser.notify();
           parser.commands.push_back(token);
       }
       return HandlerPtr(new Block(parser));
