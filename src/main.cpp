@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "get_arg.hpp"
 #include "parser.hpp"
@@ -16,9 +17,10 @@ int main(int argc, char const *argv[]) {
     return EXIT_FAILURE;
   }
 
-  TeeBuffer teeBuffer { };
-  ostream stream { &teeBuffer };
+  auto teeBuffer { make_shared<TeeBuffer>() };
+  ostream stream { teeBuffer.get() };
   Parser parser { N, stream };
+  parser.subscribe(teeBuffer);
   string buf { };
 
   while (!cin.eof()) {

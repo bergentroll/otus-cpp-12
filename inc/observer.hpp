@@ -2,6 +2,9 @@
 #define OTUS_OBSERVER_HPP
 
 #include <memory>
+#include <list>
+
+#include <iostream>
 
 namespace otus {
   class Observer {
@@ -13,9 +16,25 @@ namespace otus {
 
   class Observable {
   public:
-    virtual ~Observable() = default;
+    void subscribe(const std::shared_ptr<Observer>& observer) {
+      subscribers.emplace_back(observer);
+    }
 
-    virtual void subscribe(const std::shared_ptr<Observer>& observer) = 0;
+    void notify() {
+      auto iter = subscribers.begin();
+      while(iter != subscribers.end()) {
+        auto ptr = iter->lock();
+        if (ptr) {
+          ptr->update();
+          ++iter;
+        } else {
+          subscribers.erase(iter++);
+        }
+      }
+    }
+
+  private:
+    std::list<std::weak_ptr<Observer>> subscribers { };
   };
 }
 

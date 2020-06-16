@@ -1,5 +1,5 @@
-#ifndef PARSER_HPP
-#define PARSER_HPP
+#ifndef OTUS_PARSER_HPP
+#define OTUS_PARSER_HPP
 
 #include <iostream>
 #include <memory>
@@ -10,42 +10,41 @@
 #include <observer.hpp>
 
 namespace otus {
-  class Parser: Observable {
+  class Parser: public Observable {
   public:
     class InvalidToken: public std::logic_error {
     public:
       explicit InvalidToken(const std::string &input):
       std::logic_error("unexpected token: " + input) { }
     };
-  
+
     Parser(int packSize, std::ostream &stream = std::cout):
     packSize(packSize), stream(stream) { commands.reserve(packSize); }
-  
+
     Parser& operator <<(std::string const &token) {
       handler = handler->readToken(token);
       return *this;
     }
 
-    void subscribe(const std::shared_ptr<Observer>& observer) override { }
-
   private:
     class Handler; class Plain; class Block; class Nested;
     using HandlerPtr = std::unique_ptr<Handler>;
-  
+
     class Handler {
     public: virtual ~Handler() = default;
-  
+
       [[ nodiscard ]]
       virtual HandlerPtr readToken(std::string const & token) = 0;
     };
-  
+
     class Plain: public Handler {
     public:
       Plain(Parser &parser): parser(parser) { }
-  
+
       HandlerPtr readToken(std::string const & token) override {
         if (token == "{") {
             if (parser.commands.size() > 0) parser.flushCommands();
+            parser.notify();
             return HandlerPtr(new Block(parser));
         }
         else if (token == "}") {
@@ -56,35 +55,36 @@ namespace otus {
         }
         return HandlerPtr(new Plain(parser));
       }
-  
+
     private:
       Parser &parser;
     };
-  
+
     class Block: public Handler {
     public:
       Block(Parser &parser): parser(parser) { }
-  
+
       HandlerPtr readToken(std::string const & token) override {
         if (token == "{") {
           return HandlerPtr(new Nested(parser, 1));
         } else if (token == "}") {
           if (parser.commands.size() > 0) parser.flushCommands();
+          parser.notify();
           return HandlerPtr(new Plain(parser));
       } else {
           parser.commands.push_back(token);
       }
       return HandlerPtr(new Block(parser));
     }
-  
+
     private:
       Parser &parser;
     };
-  
+
     class Nested: public Handler {
     public:
       Nested(Parser &parser, int level): parser(parser), level(level) { }
-  
+
       HandlerPtr readToken(std::string const & token) override {
         if (token == "{") {
           ++level;
@@ -96,17 +96,17 @@ namespace otus {
         }
         return HandlerPtr(new Nested(parser, level));
       }
-  
+
     private:
       Parser &parser;
       int level;
     };
-  
+
     HandlerPtr handler { new Plain(*this) };
     std::size_t const packSize;
     std::ostream &stream;
     std::vector<std::string> commands;
-  
+
     void flushCommands() {
       stream << "bulk: ";
       for (size_t i { }; i < commands.size(); ++i) {

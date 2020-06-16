@@ -16,16 +16,16 @@ namespace otus {
       sync();
       file.close();
     }
-  
+
     TeeBuffer() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
       };
-  
+
       std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
       file = std::ofstream(path);
     }
-  
+
     int sync() override {
       std::cout << str();
       file << str();
@@ -33,8 +33,18 @@ namespace otus {
       return 0;
     }
 
-    void update() override { }
-  
+    void update() override {
+      sync();
+      file.close();
+
+      auto now {
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
+      };
+
+      std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
+      file = std::ofstream(path);
+    }
+
   private:
     std::ofstream file;
   };
