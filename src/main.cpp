@@ -23,14 +23,15 @@ int main(int argc, char const *argv[]) {
   parser.subscribe(teeBuffer);
   string buf { };
 
-  while (!cin.eof()) {
-    cin >> buf;
+  cin >> buf;
+  while (cin) {
     try {
       parser << buf;
     }
     catch (Parser::InvalidToken &e) {
       cerr << "Error occured: " << e.what() << endl;
     }
+    cin >> buf;
   }
 
   return EXIT_SUCCESS;
