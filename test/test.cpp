@@ -97,8 +97,3 @@ TEST(get_arg, out_of_range) {
   v[1] = to_string(static_cast<long>(numeric_limits<int>::max()) + 1).c_str();
   EXPECT_THROW(get_arg(2, v), InvalidArgument);
 }
-
-int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

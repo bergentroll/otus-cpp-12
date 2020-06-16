@@ -39,7 +39,8 @@ if(GTEST_FOUND)
   target_link_libraries(
     test_suite
     PRIVATE
-    gtest)
+    gtest
+    gtest_main)
   add_test(test_suite test_suite)
 else()
   message(
