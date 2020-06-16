@@ -5,6 +5,7 @@
 #include "get_arg.hpp"
 
 using namespace std;
+using namespace otus;
 
 TEST(bulk, plain) {
   stringstream ss { };

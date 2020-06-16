@@ -1,5 +1,5 @@
-#ifndef TEE_BUFFER_HPP
-#define TEE_BUFFER_HPP
+#ifndef OTUS_TEE_BUFFER_HPP
+#define OTUS_TEE_BUFFER_HPP
 
 #include <chrono>
 #include <filesystem>
@@ -7,31 +7,37 @@
 #include <iostream>
 #include <sstream>
 
-class TeeBuffer: public std::stringbuf{
-public:
-  ~TeeBuffer() override {
-    sync();
-    file.close();
-  }
+#include "observer.hpp"
 
-  TeeBuffer() {
-    auto now {
-      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
-    };
+namespace otus {
+  class TeeBuffer: public std::stringbuf, public Observer {
+  public:
+    ~TeeBuffer() override {
+      sync();
+      file.close();
+    }
+  
+    TeeBuffer() {
+      auto now {
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
+      };
+  
+      std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
+      file = std::ofstream(path);
+    }
+  
+    int sync() override {
+      std::cout << str();
+      file << str();
+      str("");
+      return 0;
+    }
 
-    std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
-    file = std::ofstream(path);
-  }
-
-  int sync() override {
-    std::cout << str();
-    file << str();
-    str("");
-    return 0;
-  }
-
-private:
-  std::ofstream file;
-};
+    void update() override { }
+  
+  private:
+    std::ofstream file;
+  };
+}
 
 #endif

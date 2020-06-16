@@ -5,6 +5,7 @@
 #include "tee_buffer.hpp"
 
 using namespace std;
+using namespace otus;
 
 int main(int argc, char const *argv[]) {
   int N;
