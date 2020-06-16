@@ -10,20 +10,15 @@
 #include "observer.hpp"
 
 namespace otus {
+  // TODO: Testing.
   class TeeBuffer: public std::stringbuf, public Observer {
   public:
     ~TeeBuffer() override {
-      sync();
-      file.close();
+      closeFile();
     }
 
     TeeBuffer() {
-      auto now {
-        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
-      };
-
-      std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
-      file = std::ofstream(path);
+      nextFile();
     }
 
     int sync() override {
@@ -34,19 +29,27 @@ namespace otus {
     }
 
     void update() override {
-      sync();
-      file.close();
+      closeFile();
+      nextFile();
+    }
 
+  private:
+    std::ofstream file;
+
+    void nextFile() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
       };
 
       std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
-      file = std::ofstream(path);
+      // When things happen to quick, existing file will be appended.
+      file = std::ofstream(path, std::ios_base::app);
     }
 
-  private:
-    std::ofstream file;
+    void closeFile() {
+      sync();
+      file.close();
+    }
   };
 }
 
