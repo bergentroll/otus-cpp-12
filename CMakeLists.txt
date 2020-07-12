@@ -5,7 +5,7 @@ if($ENV{TRAVIS_BUILD_NUMBER})
 else()
   set(VERSION 0.0.0)
 endif()
-project(bulk VERSION ${VERSION})
+project(bulkmt VERSION ${VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
