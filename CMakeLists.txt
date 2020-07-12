@@ -25,10 +25,15 @@ if(NOT EXISTS "${GTEST_SRCDIR}/CMakeLists.txt")
   set(GTEST_FOUND No)
 endif()
 
+find_package(Threads REQUIRED)
+
 ### Main targets ##############################################################
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} stdc++fs)
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}
+  stdc++fs
+  ${CMAKE_THREAD_LIBS_INIT})
 
 ### Tests #####################################################################
 

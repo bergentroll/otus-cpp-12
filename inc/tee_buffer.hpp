@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #include "observer.hpp"
 
@@ -18,8 +19,10 @@ namespace otus {
     }
 
     int sync() override {
-      std::cout << str();
-      file << str();
+      std::thread log { [this]() { std::cout << str(); } };
+      std::thread file1 { [this]() { file << str(); } };
+      log.join();
+      file1.join();
       str("");
       return 0;
     }
@@ -38,7 +41,7 @@ namespace otus {
       };
 
       std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
-      // When things happen to quick, existing file will be appended.
+      // When things happen too quick, existing file will be appended.
       file = std::ofstream(path, std::ios_base::app);
     }
 
