@@ -19,6 +19,10 @@ namespace otus {
     TeeBuffer() {
       fileThreads.emplace_back(std::thread([this]() { fileWorker(); }));
       fileThreads.emplace_back(std::thread([this]() { fileWorker(); }));
+      logThread.detach();
+      for (auto &thread: fileThreads) {
+        thread.detach();
+      }
     }
 
     ~TeeBuffer() override {
@@ -27,10 +31,6 @@ namespace otus {
         if (fileInputQueue.empty() && stdoutInputQueue.empty()) break;
       }
       done = true;
-      logThread.join();
-      for (auto &thread: fileThreads) {
-        thread.join();
-      }
       closeFile();
     }
 
@@ -59,7 +59,6 @@ namespace otus {
     std::queue<std::string> fileInputQueue { };
     std::thread logThread { [this]() { logWorker(); } };
     std::vector<std::thread> fileThreads { };
-    // TODO Shared mutex
     std::shared_mutex mutex { };
 
     void logWorker() {
