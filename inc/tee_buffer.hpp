@@ -1,10 +1,11 @@
 #ifndef OTUS_TEE_BUFFER_HPP
 #define OTUS_TEE_BUFFER_HPP
 
+#include <atomic>
 #include <chrono>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <thread>
 
@@ -29,20 +30,27 @@ namespace otus {
 
     void update() override {
       closeFile();
+      ++index;
       nextFile();
     }
 
   private:
     std::ofstream file { };
+    std::atomic<uint16_t> index { };
 
     void nextFile() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
       };
 
-      std::filesystem::path const path = "bulk" + std::to_string(now) + ".log";
-      // When things happen too quick, existing file will be appended.
-      file = std::ofstream(path, std::ios_base::app);
+      std::stringstream path { };
+      path
+        << "bulk"
+        << std::to_string(now)
+        << '-'
+        << std::setfill('0') << std::setw(5) << std::to_string(index)
+        << ".log";
+      file = std::ofstream(path.str(), std::ios_base::app);
     }
 
     void closeFile() {
