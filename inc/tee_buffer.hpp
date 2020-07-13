@@ -31,7 +31,7 @@ namespace otus {
         if (fileInputQueue.empty() && stdoutInputQueue.empty()) break;
       }
       done = true;
-      closeFile();
+      file.close();
     }
 
     int sync() override {
@@ -44,15 +44,11 @@ namespace otus {
       return 0;
     }
 
-    void update() override {
-      closeFile();
-      ++index;
-      nextFile();
-    }
+    void update() override { }
 
   private:
     std::ofstream file { };
-    std::atomic<uint16_t> index { };
+    uint16_t index { 1 };
     std::atomic_bool done { };
     // TODO DRY
     std::queue<std::string> stdoutInputQueue { };
@@ -61,6 +57,7 @@ namespace otus {
     std::vector<std::thread> fileThreads { };
     std::shared_mutex mutex { };
 
+    // TODO Conditional variable.
     void logWorker() {
       while (!done) {
         if (mutex.try_lock()) {
@@ -78,7 +75,9 @@ namespace otus {
       while (!done) {
         if (mutex.try_lock()) {
           if (!fileInputQueue.empty()) {
+            nextFile();
             file << fileInputQueue.front();
+            file.close();
             fileInputQueue.pop();
           }
           mutex.unlock();
@@ -86,7 +85,6 @@ namespace otus {
       }
     }
 
-    // FIXME Critical
     void nextFile() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
@@ -99,15 +97,8 @@ namespace otus {
         << '-'
         << std::setfill('0') << std::setw(5) << std::to_string(index)
         << ".log";
-      {
-        std::unique_lock lock { mutex };
-        file = std::ofstream(path.str(), std::ios_base::app);
-      }
-    }
-
-    void closeFile() {
-      sync();
-      file.close();
+      file = std::ofstream(path.str(), std::ios_base::app);
+      ++index;
     }
   };
 }
