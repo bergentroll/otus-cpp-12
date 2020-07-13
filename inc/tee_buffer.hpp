@@ -4,26 +4,42 @@
 #include <atomic>
 #include <chrono>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <mutex>
+#include <queue>
 #include <sstream>
 #include <thread>
 
 #include "observer.hpp"
 
 namespace otus {
-  // TODO: Testing.
   class TeeBuffer: public std::stringbuf, public Observer {
   public:
+    TeeBuffer() {
+      fileThreads.emplace_back(std::thread([this]() { fileWorker(); }));
+      fileThreads.emplace_back(std::thread([this]() { fileWorker(); }));
+    }
+
     ~TeeBuffer() override {
+      while (true) {
+        std::lock_guard lock { mutex };
+        if (fileInputQueue.empty() && stdoutInputQueue.empty()) break;
+      }
+      done = true;
+      logThread.join();
+      for (auto &thread: fileThreads) {
+        thread.join();
+      }
       closeFile();
     }
 
     int sync() override {
-      std::thread log { [this]() { std::cout << str(); } };
-      std::thread file1 { [this]() { file << str(); } };
-      log.join();
-      file1.join();
+      {
+        std::lock_guard lock { mutex };
+        stdoutInputQueue.push(str());
+        fileInputQueue.push(str());
+      }
       str("");
       return 0;
     }
@@ -37,6 +53,39 @@ namespace otus {
   private:
     std::ofstream file { };
     std::atomic<uint16_t> index { };
+    std::atomic_bool done { };
+    // TODO DRY
+    std::queue<std::string> stdoutInputQueue { };
+    std::queue<std::string> fileInputQueue { };
+    std::thread logThread { [this]() { logWorker(); } };
+    std::vector<std::thread> fileThreads { };
+    // TODO Shared mutex
+    std::mutex mutex { };
+
+    void logWorker() {
+      while (!done) {
+        if (mutex.try_lock()) {
+          if (!stdoutInputQueue.empty()) {
+            std::cout << stdoutInputQueue.front();
+            stdoutInputQueue.pop();
+          }
+          mutex.unlock();
+        }
+      }
+    }
+
+    // TODO DRY
+    void fileWorker() {
+      while (!done) {
+        if (mutex.try_lock()) {
+          if (!fileInputQueue.empty()) {
+            file << fileInputQueue.front();
+            fileInputQueue.pop();
+          }
+          mutex.unlock();
+        }
+      }
+    }
 
     void nextFile() {
       auto now {
@@ -50,7 +99,10 @@ namespace otus {
         << '-'
         << std::setfill('0') << std::setw(5) << std::to_string(index)
         << ".log";
-      file = std::ofstream(path.str(), std::ios_base::app);
+      {
+        std::lock_guard lock { mutex };
+        file = std::ofstream(path.str(), std::ios_base::app);
+      }
     }
 
     void closeFile() {
