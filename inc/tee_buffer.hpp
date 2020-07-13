@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <mutex>
+#include <shared_mutex>
 #include <queue>
 #include <sstream>
 #include <thread>
@@ -23,7 +23,7 @@ namespace otus {
 
     ~TeeBuffer() override {
       while (true) {
-        std::lock_guard lock { mutex };
+        std::shared_lock lock { mutex };
         if (fileInputQueue.empty() && stdoutInputQueue.empty()) break;
       }
       done = true;
@@ -36,7 +36,7 @@ namespace otus {
 
     int sync() override {
       {
-        std::lock_guard lock { mutex };
+        std::unique_lock lock { mutex };
         stdoutInputQueue.push(str());
         fileInputQueue.push(str());
       }
@@ -60,7 +60,7 @@ namespace otus {
     std::thread logThread { [this]() { logWorker(); } };
     std::vector<std::thread> fileThreads { };
     // TODO Shared mutex
-    std::mutex mutex { };
+    std::shared_mutex mutex { };
 
     void logWorker() {
       while (!done) {
@@ -87,6 +87,7 @@ namespace otus {
       }
     }
 
+    // FIXME Critical
     void nextFile() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
@@ -100,7 +101,7 @@ namespace otus {
         << std::setfill('0') << std::setw(5) << std::to_string(index)
         << ".log";
       {
-        std::lock_guard lock { mutex };
+        std::unique_lock lock { mutex };
         file = std::ofstream(path.str(), std::ios_base::app);
       }
     }
