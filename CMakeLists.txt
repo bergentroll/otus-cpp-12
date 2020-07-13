@@ -32,7 +32,6 @@ find_package(Threads REQUIRED)
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
 target_link_libraries(
   ${CMAKE_PROJECT_NAME}
-  stdc++fs
   ${CMAKE_THREAD_LIBS_INIT})
 
 ### Tests #####################################################################
