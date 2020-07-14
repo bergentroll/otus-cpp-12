@@ -35,6 +35,13 @@ namespace otus {
         if (fileInputQueue.empty()) break;
       }
       done = true;
+      {
+        std::unique_lock lock { stdstreamMutex };
+        std::cerr << mainStatistics;
+        for (auto const &worker: workers) {
+          std::cerr << std::string(*worker);
+        }
+      }
     }
 
     void print(std::string const &block, unsigned blockSize) {
@@ -48,7 +55,9 @@ namespace otus {
       }
     }
 
-    std::shared_mutex & getStdstreamMutex() { return stdstreamMutex; }
+    void setMainStatistics(std::string_view mainStatistics) {
+      this->mainStatistics = mainStatistics;
+    }
 
   private:
     std::atomic_bool done { };
@@ -57,6 +66,7 @@ namespace otus {
     Worker::QueueType fileInputQueue { };
     std::shared_mutex stdstreamMutex { };
     std::shared_mutex fileMutex { };
+    std::string mainStatistics { };
   };
 }
 

@@ -28,9 +28,11 @@ namespace otus {
       thread.detach();
     }
 
-    virtual ~Worker() {
-      std::unique_lock lock { mutex };
-      std::cerr
+    virtual ~Worker() = default;
+
+    virtual operator std::string () const {
+      std::stringstream ss;
+      ss
         << "Thread "
         << name
         << ": "
@@ -39,7 +41,29 @@ namespace otus {
         << commandsCounter
         << " commands."
         << std::endl;
+      return ss.str();
     };
+
+    void run() {
+      while (!endFlag) {
+        bool hasWork { };
+        if (mutex.try_lock()) {
+          if (!queue.empty()) {
+            hasWork = true;
+            execCritical();
+            ++blocksCounter;
+            commandsCounter += queue.front().second;
+            queue.pop();
+          }
+          mutex.unlock();
+          if (hasWork) execPostCritical();
+        }
+      }
+    }
+
+    virtual void execCritical() = 0;
+
+    virtual void execPostCritical() { }
 
   protected:
     std::string name;
@@ -48,57 +72,32 @@ namespace otus {
     std::atomic_bool const &endFlag;
     unsigned blocksCounter { };
     unsigned commandsCounter { };
-
-    virtual void run() = 0;
   };
 
   class WorkerStdout: public Worker {
-  protected:
-    virtual void run() {
-      while (!endFlag) {
-        if (mutex.try_lock()) {
-          if (!queue.empty()) {
-            std::cout << queue.front().first;
-            ++blocksCounter;
-            commandsCounter += queue.front().second;
-            queue.pop();
-          }
-          mutex.unlock();
-        }
-      }
-    }
-
-  private:
     using Worker::Worker;
+
+    void execCritical() override {
+      std::cout << queue.front().first;
+    }
   };
 
   class WorkerFile: public Worker {
-  protected:
-    virtual void run() {
-      while (!endFlag) {
-        std::string buf { };
-        if (mutex.try_lock()) {
-          if (!queue.empty()) {
-            buf = queue.front().first;
-            commandsCounter += queue.front().second;
-            queue.pop();
-            mutex.unlock();
-
-            std::ofstream file { generateFileName(), std::ios_base::app };
-            file << buf;
-            file.close();
-            ++blocksCounter;
-          } else {
-            mutex.unlock();
-          }
-        }
-      }
-    }
-
-  private:
     using Worker::Worker;
 
+    std::string buf { };
     static inline std::atomic_uint index { 1 };
+
+    void execCritical() override {
+      buf = queue.front().first;
+      commandsCounter += queue.front().second;
+    }
+
+    void execPostCritical() override {
+      std::ofstream file { generateFileName(), std::ios_base::app };
+      file << buf;
+      file.close();
+    }
 
     std::string generateFileName() {
       auto now {

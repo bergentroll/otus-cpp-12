@@ -23,8 +23,8 @@ namespace otus {
     packSize(packSize), logger(logger) { commands.reserve(packSize); }
 
     ~Parser() {
-      std::unique_lock lock { logger.getStdstreamMutex() };
-      std::cerr
+      std::stringstream ss { };
+      ss
         << "Thread main: "
         << linesCounter
         << " lines, "
@@ -33,6 +33,7 @@ namespace otus {
         << commandsCounter
         << " commands."
         << std::endl;
+      logger.setMainStatistics(ss.str());
     }
 
     Parser& operator <<(std::string const &token) {
