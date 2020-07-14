@@ -3,7 +3,7 @@
 
 #include "get_arg.hpp"
 #include "parser.hpp"
-#include "tee_buffer.hpp"
+#include "logger.hpp"
 
 using namespace std;
 using namespace otus;
@@ -17,10 +17,8 @@ int main(int argc, char const *argv[]) {
     return EXIT_FAILURE;
   }
 
-  auto teeBuffer { make_shared<TeeBuffer>() };
-  ostream stream { teeBuffer.get() };
-  Parser parser { N, stream };
-  parser.subscribe(teeBuffer);
+  Logger logger { };
+  Parser parser { N, logger };
   string buf { };
 
   cin >> buf;

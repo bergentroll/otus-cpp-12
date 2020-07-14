@@ -16,28 +16,44 @@ namespace otus {
   // TODO Conditional variable.
   class Worker {
   public:
+    using QueueType = std::queue<std::pair<std::string, unsigned>>;
+
     Worker(
         std::shared_mutex &mutex,
-        std::queue<std::string> &queue,
+        QueueType &queue,
         std::atomic_bool const &endFlag):
         mutex(mutex), queue(queue), endFlag(endFlag) {
       std::thread thread { [this]() { run(); } };
       thread.detach();
     }
 
-    virtual ~Worker() { };
+    virtual ~Worker() {
+      std::unique_lock lock { mutex };
+      std::cerr
+        << "Thread  : "
+        << blocksCounter
+        << " blocks, "
+        << commandsCounter
+        << " commands."
+        << std::endl;
+    };
 
   protected:
     virtual void execute() = 0;
     std::shared_mutex &mutex;
-    std::queue<std::string> &queue;
+    QueueType &queue;
     std::atomic_bool const &endFlag;
+    unsigned blocksCounter { };
+    unsigned commandsCounter { };
 
     void run() {
       while (!endFlag) {
         if (mutex.try_lock()) {
           if (!queue.empty()) {
             execute();
+            ++blocksCounter;
+            commandsCounter += queue.front().second;
+            queue.pop();
           }
           mutex.unlock();
         }
@@ -48,8 +64,7 @@ namespace otus {
   class WorkerStdout: public Worker {
   protected:
     virtual void execute() {
-      std::cout << queue.front();
-      queue.pop();
+      std::cout << queue.front().first;
     }
 
   private:
@@ -60,9 +75,8 @@ namespace otus {
   protected:
     virtual void execute() {
       nextFile();
-      file << queue.front();
+      file << queue.front().first;
       file.close();
-      queue.pop();
     }
 
   private:
