@@ -8,7 +8,15 @@
 #include "worker.hpp"
 
 namespace otus {
-  class Logger {
+  class ILogger {
+  public:
+    virtual ~ILogger() { };
+    virtual void print(std::string const &, unsigned) = 0;
+    virtual void setMainStatistics(std::string_view) = 0;
+  };
+
+  // TODO Testing
+  class Logger: public ILogger {
   public:
     Logger() {
       workers.emplace_back( new WorkerStdout(
@@ -25,7 +33,7 @@ namespace otus {
               done));
     }
 
-    ~Logger() {
+    ~Logger() override {
       while (true) {
         std::shared_lock lock { stdstreamMutex };
         if (stdoutInputQueue.empty()) break;
@@ -44,7 +52,7 @@ namespace otus {
       }
     }
 
-    void print(std::string const &block, unsigned blockSize) {
+    void print(std::string const &block, unsigned blockSize) override {
       {
         std::unique_lock lock { stdstreamMutex };
         stdoutInputQueue.push(std::make_pair(block, blockSize));
@@ -55,7 +63,7 @@ namespace otus {
       }
     }
 
-    void setMainStatistics(std::string_view mainStatistics) {
+    void setMainStatistics(std::string_view mainStatistics) override {
       this->mainStatistics = mainStatistics;
     }
 

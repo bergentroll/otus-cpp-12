@@ -19,7 +19,7 @@ namespace otus {
       std::logic_error("unexpected token: " + input) { }
     };
 
-    Parser(int packSize, Logger &logger):
+    Parser(int packSize, ILogger &logger):
     packSize(packSize), logger(logger) { commands.reserve(packSize); }
 
     ~Parser() {
@@ -120,7 +120,7 @@ namespace otus {
 
     HandlerPtr handler { new Plain(*this) };
     std::size_t const packSize;
-    Logger &logger;
+    ILogger &logger;
     std::vector<std::string> commands;
     unsigned linesCounter { }, blocksCounter { }, commandsCounter { };
 
