@@ -22,8 +22,22 @@ namespace otus {
     Parser(int packSize, Logger &logger):
     packSize(packSize), logger(logger) { commands.reserve(packSize); }
 
+    ~Parser() {
+      std::unique_lock lock { logger.getMutex() };
+      std::cerr
+        << "Thread main: "
+        << linesCounter
+        << " lines, "
+        << blocksCounter
+        << " blocks, "
+        << commandsCounter
+        << " commands."
+        << std::endl;
+    }
+
     Parser& operator <<(std::string const &token) {
       handler = handler->readToken(token);
+      ++linesCounter;
       return *this;
     }
 
@@ -109,6 +123,7 @@ namespace otus {
     std::size_t const packSize;
     Logger &logger;
     std::vector<std::string> commands;
+    unsigned linesCounter { }, blocksCounter { }, commandsCounter { };
 
     void flushCommands() {
       std::stringstream stream { };
@@ -119,6 +134,8 @@ namespace otus {
       }
       stream << std::endl;
       logger.print(stream.str(), commands.size());
+      commandsCounter += commands.size();
+      ++blocksCounter;
       commands.clear();
     }
   };

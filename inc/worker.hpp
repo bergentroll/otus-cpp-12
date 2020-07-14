@@ -19,10 +19,11 @@ namespace otus {
     using QueueType = std::queue<std::pair<std::string, unsigned>>;
 
     Worker(
+        std::string const &name,
         std::shared_mutex &mutex,
         QueueType &queue,
         std::atomic_bool const &endFlag):
-        mutex(mutex), queue(queue), endFlag(endFlag) {
+        name(name), mutex(mutex), queue(queue), endFlag(endFlag) {
       std::thread thread { [this]() { run(); } };
       thread.detach();
     }
@@ -30,7 +31,9 @@ namespace otus {
     virtual ~Worker() {
       std::unique_lock lock { mutex };
       std::cerr
-        << "Thread  : "
+        << "Thread "
+        << name
+        << ": "
         << blocksCounter
         << " blocks, "
         << commandsCounter
@@ -39,12 +42,14 @@ namespace otus {
     };
 
   protected:
-    virtual void execute() = 0;
+    std::string name;
     std::shared_mutex &mutex;
     QueueType &queue;
     std::atomic_bool const &endFlag;
     unsigned blocksCounter { };
     unsigned commandsCounter { };
+
+    virtual void execute() = 0;
 
     void run() {
       while (!endFlag) {

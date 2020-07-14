@@ -11,9 +11,18 @@ namespace otus {
   class Logger {
   public:
     Logger() {
-      workers.emplace_back(new WorkerStdout(mutex, stdoutInputQueue, done));
-      for (int i { }; i < 2; ++i)
-        workers.emplace_back(new WorkerFile(mutex, fileInputQueue, done));
+      workers.emplace_back( new WorkerStdout(
+            "log",
+            mutex,
+            stdoutInputQueue,
+            done));
+
+      for (int i { 1 }; i < 3; ++i)
+        workers.emplace_back(new WorkerFile(
+              "file" + std::to_string(i),
+              mutex,
+              fileInputQueue,
+              done));
     }
 
     ~Logger() {
@@ -31,6 +40,8 @@ namespace otus {
         fileInputQueue.push(std::make_pair(block, blockSize));
       }
     }
+
+    std::shared_mutex & getMutex() { return mutex; }
 
   private:
     std::atomic_bool done { };
