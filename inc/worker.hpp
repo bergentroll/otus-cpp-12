@@ -23,12 +23,13 @@ namespace otus {
         std::shared_mutex &mutex,
         QueueType &queue,
         std::atomic_bool const &endFlag):
-        name(name), mutex(mutex), queue(queue), endFlag(endFlag) {
-      std::thread thread { [this]() { run(); } };
-      thread.detach();
-    }
+      thread([this]() { run(); }),
+      name(name),
+      mutex(mutex),
+      queue(queue),
+      endFlag(endFlag) { }
 
-    virtual ~Worker() = default;
+    virtual ~Worker() { thread.join(); }
 
     virtual operator std::string () const {
       std::stringstream ss;
@@ -43,6 +44,15 @@ namespace otus {
         << std::endl;
       return ss.str();
     };
+
+  protected:
+    std::thread thread;
+    std::string name;
+    std::shared_mutex &mutex;
+    QueueType &queue;
+    std::atomic_bool const &endFlag;
+    unsigned blocksCounter { };
+    unsigned commandsCounter { };
 
     void run() {
       while (!endFlag) {
@@ -65,13 +75,6 @@ namespace otus {
 
     virtual void execPostCritical() { }
 
-  protected:
-    std::string name;
-    std::shared_mutex &mutex;
-    QueueType &queue;
-    std::atomic_bool const &endFlag;
-    unsigned blocksCounter { };
-    unsigned commandsCounter { };
   };
 
   class WorkerStdout: public Worker {
