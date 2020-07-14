@@ -13,44 +13,50 @@ namespace otus {
     Logger() {
       workers.emplace_back( new WorkerStdout(
             "log",
-            mutex,
+            stdstreamMutex,
             stdoutInputQueue,
             done));
 
       for (int i { 1 }; i < 3; ++i)
         workers.emplace_back(new WorkerFile(
               "file" + std::to_string(i),
-              mutex,
+              fileMutex,
               fileInputQueue,
               done));
     }
 
     ~Logger() {
       while (true) {
-        std::shared_lock lock { mutex };
-        if (fileInputQueue.empty() && stdoutInputQueue.empty()) break;
+        std::shared_lock lock { stdstreamMutex };
+        if (stdoutInputQueue.empty()) break;
+      }
+      while (true) {
+        std::shared_lock lock { fileMutex };
+        if (fileInputQueue.empty()) break;
       }
       done = true;
     }
 
     void print(std::string const &block, unsigned blockSize) {
       {
-        std::unique_lock lock { mutex };
+        std::unique_lock lock { stdstreamMutex };
         stdoutInputQueue.push(std::make_pair(block, blockSize));
+      }
+      {
+        std::unique_lock lock { fileMutex };
         fileInputQueue.push(std::make_pair(block, blockSize));
       }
     }
 
-    std::shared_mutex & getMutex() { return mutex; }
+    std::shared_mutex & getStdstreamMutex() { return stdstreamMutex; }
 
   private:
     std::atomic_bool done { };
-    // TODO DRY
+    std::vector<std::unique_ptr<Worker>> workers { };
     Worker::QueueType stdoutInputQueue { };
     Worker::QueueType fileInputQueue { };
-    std::vector<std::unique_ptr<Worker>> workers { };
-    // TODO Separate mutexes.
-    std::shared_mutex mutex { };
+    std::shared_mutex stdstreamMutex { };
+    std::shared_mutex fileMutex { };
   };
 }
 

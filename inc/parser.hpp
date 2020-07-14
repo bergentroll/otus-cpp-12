@@ -23,7 +23,7 @@ namespace otus {
     packSize(packSize), logger(logger) { commands.reserve(packSize); }
 
     ~Parser() {
-      std::unique_lock lock { logger.getMutex() };
+      std::unique_lock lock { logger.getStdstreamMutex() };
       std::cerr
         << "Thread main: "
         << linesCounter
@@ -66,7 +66,6 @@ namespace otus {
         else if (token == "}") {
           throw InvalidToken(token);
         } else {
-          //if (parser.getBufferSize() == 0) parser.notify();
           parser.commands.push_back(token);
           if (parser.getBufferSize() >= parser.packSize) parser.flushCommands();
         }
@@ -88,7 +87,6 @@ namespace otus {
           if (parser.getBufferSize() > 0) parser.flushCommands();
           return HandlerPtr(new Plain(parser));
       } else {
-          //if (parser.getBufferSize() == 0) parser.notify();
           parser.commands.push_back(token);
       }
       return HandlerPtr(new Block(parser));

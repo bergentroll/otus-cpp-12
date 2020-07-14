@@ -49,13 +49,16 @@ namespace otus {
     unsigned blocksCounter { };
     unsigned commandsCounter { };
 
-    virtual void execute() = 0;
+    virtual void run() = 0;
+  };
 
-    void run() {
+  class WorkerStdout: public Worker {
+  protected:
+    virtual void run() {
       while (!endFlag) {
         if (mutex.try_lock()) {
           if (!queue.empty()) {
-            execute();
+            std::cout << queue.front().first;
             ++blocksCounter;
             commandsCounter += queue.front().second;
             queue.pop();
@@ -64,13 +67,6 @@ namespace otus {
         }
       }
     }
-  };
-
-  class WorkerStdout: public Worker {
-  protected:
-    virtual void execute() {
-      std::cout << queue.front().first;
-    }
 
   private:
     using Worker::Worker;
@@ -78,19 +74,33 @@ namespace otus {
 
   class WorkerFile: public Worker {
   protected:
-    virtual void execute() {
-      nextFile();
-      file << queue.front().first;
-      file.close();
+    virtual void run() {
+      while (!endFlag) {
+        std::string buf { };
+        if (mutex.try_lock()) {
+          if (!queue.empty()) {
+            buf = queue.front().first;
+            commandsCounter += queue.front().second;
+            queue.pop();
+            mutex.unlock();
+
+            std::ofstream file { generateFileName(), std::ios_base::app };
+            file << buf;
+            file.close();
+            ++blocksCounter;
+          } else {
+            mutex.unlock();
+          }
+        }
+      }
     }
 
   private:
     using Worker::Worker;
 
-    static inline std::ofstream file { };
-    static inline uint16_t index { 1 };
+    static inline std::atomic_uint index { 1 };
 
-    void nextFile() {
+    std::string generateFileName() {
       auto now {
         std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())
       };
@@ -102,8 +112,8 @@ namespace otus {
         << '-'
         << std::setfill('0') << std::setw(5) << std::to_string(index)
         << ".log";
-      file = std::ofstream(path.str(), std::ios_base::app);
       ++index;
+      return path.str();
     }
   };
 }
