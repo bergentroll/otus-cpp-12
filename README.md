@@ -1,5 +1,5 @@
 [![Build Status](
-  https://travis-ci.com/bergentroll/otus-cpp-10.svg?branch=master
-)](https://travis-ci.com/bergentroll/otus-cpp-10)
+  https://travis-ci.com/bergentroll/otus-cpp-11.svg?branch=master
+)](https://travis-ci.com/bergentroll/otus-cpp-11)
 
-# Домашнее задание 10: Интерпретатор пакетов комманд многопоточный
+# Домашнее задание 11: Библиотека интерпретатора пакетов комманд многопоточного
