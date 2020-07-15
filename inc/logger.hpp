@@ -11,7 +11,7 @@ namespace otus {
   class ILogger {
   public:
     virtual ~ILogger() { };
-    virtual void print(std::string const &, unsigned) = 0;
+    virtual void print(std::string const &) = 0;
     virtual void setMainStatistics(std::string_view) = 0;
   };
 
@@ -43,23 +43,16 @@ namespace otus {
         if (fileInputQueue.empty()) break;
       }
       done = true;
-      {
-        std::unique_lock lock { stdstreamMutex };
-        std::cerr << mainStatistics;
-        for (auto const &worker: workers) {
-          std::cerr << std::string(*worker);
-        }
-      }
     }
 
-    void print(std::string const &block, unsigned blockSize) override {
+    void print(std::string const &block) override {
       {
         std::unique_lock lock { stdstreamMutex };
-        stdoutInputQueue.push(std::make_pair(block, blockSize));
+        stdoutInputQueue.push(block);
       }
       {
         std::unique_lock lock { fileMutex };
-        fileInputQueue.push(std::make_pair(block, blockSize));
+        fileInputQueue.push(block);
       }
     }
 

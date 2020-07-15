@@ -16,7 +16,7 @@ namespace otus {
   // TODO Conditional variable.
   class Worker {
   public:
-    using QueueType = std::queue<std::pair<std::string, unsigned>>;
+    using QueueType = std::queue<std::string>;
 
     Worker(
         std::string const &name,
@@ -31,28 +31,12 @@ namespace otus {
 
     virtual ~Worker() { thread.join(); }
 
-    virtual operator std::string () const {
-      std::stringstream ss;
-      ss
-        << "Thread "
-        << name
-        << ": "
-        << blocksCounter
-        << " blocks, "
-        << commandsCounter
-        << " commands."
-        << std::endl;
-      return ss.str();
-    };
-
   protected:
     std::thread thread;
     std::string name;
     std::shared_mutex &mutex;
     QueueType &queue;
     std::atomic_bool const &endFlag;
-    unsigned blocksCounter { };
-    unsigned commandsCounter { };
 
     void run() {
       while (!endFlag) {
@@ -61,8 +45,6 @@ namespace otus {
           if (!queue.empty()) {
             hasWork = true;
             execCritical();
-            ++blocksCounter;
-            commandsCounter += queue.front().second;
             queue.pop();
           }
           mutex.unlock();
@@ -81,7 +63,7 @@ namespace otus {
     using Worker::Worker;
 
     void execCritical() override {
-      std::cout << queue.front().first;
+      std::cout << queue.front();
     }
   };
 
@@ -92,8 +74,7 @@ namespace otus {
     static inline std::atomic_uint index { 1 };
 
     void execCritical() override {
-      buf = queue.front().first;
-      commandsCounter += queue.front().second;
+      buf = queue.front();
     }
 
     void execPostCritical() override {
