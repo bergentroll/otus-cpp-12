@@ -1,36 +1,17 @@
 #include <iostream>
-#include <memory>
 
-#include "get_arg.hpp"
-#include "parser.hpp"
-#include "logger.hpp"
+#include "async.h"
 
-using namespace std;
-using namespace otus;
+int main(int, char *[]) {
+    std::size_t bulk = 5;
+    auto h = async::connect(bulk);
+    auto h2 = async::connect(bulk);
+    async::receive(h, "1", 1);
+    async::receive(h2, "1\n", 2);
+    async::receive(h, "\n2\n3\n4\n5\n6\n{\na\n", 15);
+    async::receive(h, "b\nc\nd\n}\n89\n", 11);
+    async::disconnect(h);
+    async::disconnect(h2);
 
-int main(int argc, char const *argv[]) {
-  int N;
-  try {
-    N = get_arg(argc, argv);
-  } catch (InvalidArgument &e) {
-    cerr << "Usage error: " << e.what() << endl;
-    return EXIT_FAILURE;
-  }
-
-  Logger logger { };
-  Parser parser { N, logger };
-  string buf { };
-
-  cin >> buf;
-  while (cin) {
-    try {
-      parser << buf;
-    }
-    catch (Parser::InvalidToken &e) {
-      cerr << "Error occured: " << e.what() << endl;
-    }
-    cin >> buf;
-  }
-
-  return EXIT_SUCCESS;
+    return 0;
 }

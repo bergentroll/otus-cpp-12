@@ -5,7 +5,7 @@ if($ENV{TRAVIS_BUILD_NUMBER})
 else()
   set(VERSION 0.0.0)
 endif()
-project(bulkmt VERSION ${VERSION})
+project(async VERSION ${VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,10 +29,11 @@ find_package(Threads REQUIRED)
 
 ### Main targets ##############################################################
 
-add_executable(${CMAKE_PROJECT_NAME} ${SRC_PATH}/main.cpp)
-target_link_libraries(
-  ${CMAKE_PROJECT_NAME}
-  ${CMAKE_THREAD_LIBS_INIT})
+add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC_PATH}/async.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(${CMAKE_PROJECT_NAME}_cli ${SRC_PATH}/main.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME}_cli ${CMAKE_PROJECT_NAME})
 
 ### Tests #####################################################################
 
