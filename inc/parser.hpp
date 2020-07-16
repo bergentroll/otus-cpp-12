@@ -22,6 +22,11 @@ namespace otus {
     Parser(int packSize, ILogger &logger):
     packSize(packSize), logger(logger) { commands.reserve(packSize); }
 
+    Parser& operator <<(std::string const &token) {
+      handler = handler->readToken(token);
+      return *this;
+    }
+
     size_t getBufferSize() { return commands.size(); }
 
   private:

@@ -10,9 +10,7 @@ using namespace otus;
 
 class MockLogger: public ILogger {
 public: 
-  virtual void print(string const &input, unsigned) { ss << input; }
-
-  virtual void setMainStatistics(string_view) { }
+  virtual void print(string const &input) override { ss << input; }
 
   string str() const {
     return ss.str();

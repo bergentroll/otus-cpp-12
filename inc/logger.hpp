@@ -12,7 +12,6 @@ namespace otus {
   public:
     virtual ~ILogger() { };
     virtual void print(std::string const &) = 0;
-    virtual void setMainStatistics(std::string_view) = 0;
   };
 
   // TODO Testing
@@ -54,10 +53,6 @@ namespace otus {
         std::unique_lock lock { fileMutex };
         fileInputQueue.push(block);
       }
-    }
-
-    void setMainStatistics(std::string_view mainStatistics) override {
-      this->mainStatistics = mainStatistics;
     }
 
   private:
