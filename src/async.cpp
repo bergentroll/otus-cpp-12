@@ -15,7 +15,6 @@ namespace async {
 
   void receive(handle_t handle, const char *data, std::size_t size) {
     if (!handle) throw invalid_argument("invalidated context recieved");
-    // TODO async
     handle->receive(string(data, size));
   }
 
