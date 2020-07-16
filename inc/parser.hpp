@@ -22,6 +22,10 @@ namespace otus {
     Parser(int packSize, std::ostream &stream = std::cout):
     packSize(packSize), stream(stream) { commands.reserve(packSize); }
 
+    ~Parser() {
+      if (getBufferSize() > 0) flushCommands();
+    }
+
     Parser& operator <<(std::string const &token) {
       handler = handler->readToken(token);
       return *this;

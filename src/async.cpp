@@ -15,14 +15,8 @@ namespace async {
 
   void receive(handle_t handle, const char *data, std::size_t size) {
     if (!handle) throw invalid_argument("invalidated context recieved");
-    stringstream stream { string(data, size) };
-    string buf { };
     // TODO async
-    // FIXME tokenize
-    while (getline(stream, buf, '\n')) {
-      //cerr << buf << endl;
-      handle->getParser() << buf;
-    }
+    handle->receive(string(data, size));
   }
 
   void disconnect(handle_t handle) {
