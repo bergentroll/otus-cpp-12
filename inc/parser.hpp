@@ -3,15 +3,15 @@
 
 #include <iostream>
 #include <memory>
+#include <ostream>
 #include <stdexcept>
-#include <sstream>
 #include <string>
 #include <vector>
 
-#include "logger.hpp"
+#include "observer.hpp"
 
 namespace otus {
-  class Parser {
+  class Parser: public Observable {
   public:
     class InvalidToken: public std::logic_error {
     public:
@@ -19,8 +19,8 @@ namespace otus {
       std::logic_error("unexpected token: " + input) { }
     };
 
-    Parser(int packSize, ILogger &logger):
-    packSize(packSize), logger(logger) { commands.reserve(packSize); }
+    Parser(int packSize, std::ostream &stream = std::cout):
+    packSize(packSize), stream(stream) { commands.reserve(packSize); }
 
     Parser& operator <<(std::string const &token) {
       handler = handler->readToken(token);
@@ -105,18 +105,17 @@ namespace otus {
 
     HandlerPtr handler { new Plain(*this) };
     std::size_t const packSize;
-    ILogger &logger;
+    std::ostream &stream;
     std::vector<std::string> commands;
 
     void flushCommands() {
-      std::stringstream stream { };
+      notify();
       stream << "bulk: ";
       for (size_t i { }; i < commands.size(); ++i) {
         stream << commands[i];
         if (i < commands.size() - 1) stream << ", ";
       }
       stream << std::endl;
-      logger.print(stream.str());
       commands.clear();
     }
   };
