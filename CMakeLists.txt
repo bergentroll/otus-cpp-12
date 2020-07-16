@@ -58,7 +58,8 @@ enable_testing()
 
 ### Packing ###################################################################
 
-install(TARGETS ${CMAKE_PROJECT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION lib)
+install(TARGETS ${CMAKE_PROJECT_NAME}_cli RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_CONTACT bergentroll@insiberia.net)
