@@ -2,8 +2,6 @@
 #define OTUS_ASYNC_HPP
 
 #include <memory>
-#include <mutex>
-#include <unordered_map>
 
 #include "parser.hpp"
 #include "wrapper.hpp"

@@ -4,8 +4,6 @@
 #include <memory>
 #include <list>
 
-#include <iostream>
-
 namespace otus {
   class Observer {
   public:
@@ -20,18 +18,7 @@ namespace otus {
       subscribers.emplace_back(observer);
     }
 
-    void notify() {
-      auto iter = subscribers.begin();
-      while(iter != subscribers.end()) {
-        auto ptr = iter->lock();
-        if (ptr) {
-          ptr->update();
-          ++iter;
-        } else {
-          subscribers.erase(iter++);
-        }
-      }
-    }
+    void notify();
 
   private:
     std::list<std::weak_ptr<Observer>> subscribers { };

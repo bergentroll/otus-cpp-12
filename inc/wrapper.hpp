@@ -35,16 +35,7 @@ namespace otus {
     Parser parser;
     std::future<void> asyncResult { };
 
-    void asyncCall(std::string const &input) {
-      ss << input;
-      std::string buf { };
-      while (ss) {
-        ss >> buf;
-        if (!buf.empty()) parser << buf;
-        buf.clear();
-      }
-      ss.clear();
-    }
+    void asyncCall(std::string const &input);
   };
 }
 

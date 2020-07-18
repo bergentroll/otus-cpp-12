@@ -48,19 +48,7 @@ namespace otus {
     public:
       Plain(Parser &parser): parser(parser) { }
 
-      HandlerPtr readToken(std::string const & token) override {
-        if (token == "{") {
-            if (parser.getBufferSize() > 0) parser.flushCommands();
-            return HandlerPtr(new Block(parser));
-        }
-        else if (token == "}") {
-          throw InvalidToken(token);
-        } else {
-          parser.commands.push_back(token);
-          if (parser.getBufferSize() >= parser.packSize) parser.flushCommands();
-        }
-        return HandlerPtr(new Plain(parser));
-      }
+      HandlerPtr readToken(std::string const & token) override;
 
     private:
       Parser &parser;
@@ -70,17 +58,7 @@ namespace otus {
     public:
       Block(Parser &parser): parser(parser) { }
 
-      HandlerPtr readToken(std::string const & token) override {
-        if (token == "{") {
-          return HandlerPtr(new Nested(parser, 1));
-        } else if (token == "}") {
-          if (parser.getBufferSize() > 0) parser.flushCommands();
-          return HandlerPtr(new Plain(parser));
-      } else {
-          parser.commands.push_back(token);
-      }
-      return HandlerPtr(new Block(parser));
-    }
+      HandlerPtr readToken(std::string const & token) override;
 
     private:
       Parser &parser;
@@ -90,17 +68,7 @@ namespace otus {
     public:
       Nested(Parser &parser, int level): parser(parser), level(level) { }
 
-      HandlerPtr readToken(std::string const & token) override {
-        if (token == "{") {
-          ++level;
-        } else if (token == "}") {
-          --level;
-          if (level == 0) return HandlerPtr(new Block(parser));
-        } else {
-          parser.commands.push_back(token);
-        }
-        return HandlerPtr(new Nested(parser, level));
-      }
+      HandlerPtr readToken(std::string const & token) override;
 
     private:
       Parser &parser;
@@ -112,17 +80,8 @@ namespace otus {
     std::ostream &stream;
     std::vector<std::string> commands;
 
-    void flushCommands() {
-      notify();
-      stream << "bulk: ";
-      for (size_t i { }; i < commands.size(); ++i) {
-        stream << commands[i];
-        if (i < commands.size() - 1) stream << ", ";
-      }
-      stream << std::endl;
-      commands.clear();
-    }
+    void flushCommands();
   };
-  }
+}
 
 #endif

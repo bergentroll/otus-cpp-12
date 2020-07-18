@@ -5,7 +5,7 @@ if($ENV{TRAVIS_BUILD_NUMBER})
 else()
   set(VERSION 0.0.0)
 endif()
-project(bulk_server VERSION ${VERSION})
+project(bulk VERSION ${VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,7 +29,13 @@ find_package(Threads REQUIRED)
 
 ### Main targets ##############################################################
 
-add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC_PATH}/async.cpp)
+add_library(
+  ${CMAKE_PROJECT_NAME} SHARED
+  ${SRC_PATH}/async.cpp
+  ${SRC_PATH}/observer.cpp
+  ${SRC_PATH}/parser.cpp
+  ${SRC_PATH}/tee_buffer.cpp
+  ${SRC_PATH}/wrapper.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(${CMAKE_PROJECT_NAME}_server ${SRC_PATH}/main.cpp)
@@ -44,6 +50,7 @@ if(GTEST_FOUND)
   target_link_libraries(
     test_suite
     PRIVATE
+    ${CMAKE_PROJECT_NAME}
     gtest
     gtest_main)
   add_test(test_suite test_suite)
