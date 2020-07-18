@@ -8,7 +8,7 @@
 #include "parser.hpp"
 #include "wrapper.hpp"
 
-namespace async {
+namespace otus::async {
   using handle_t = std::shared_ptr<otus::Wrapper>;
 
   handle_t connect(size_t bulk);

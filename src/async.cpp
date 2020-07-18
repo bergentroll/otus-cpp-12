@@ -7,7 +7,7 @@
 using namespace std;
 using namespace otus;
 
-namespace async {
+namespace otus::async {
   handle_t connect(std::size_t bulk) {
     auto handle { make_shared<Wrapper>(bulk) };
     return handle;

@@ -5,7 +5,7 @@ if($ENV{TRAVIS_BUILD_NUMBER})
 else()
   set(VERSION 0.0.0)
 endif()
-project(async VERSION ${VERSION})
+project(bulk_server VERSION ${VERSION})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,8 +32,8 @@ find_package(Threads REQUIRED)
 add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC_PATH}/async.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(${CMAKE_PROJECT_NAME}_cli ${SRC_PATH}/main.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME}_cli ${CMAKE_PROJECT_NAME})
+add_executable(${CMAKE_PROJECT_NAME}_server ${SRC_PATH}/main.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME}_server ${CMAKE_PROJECT_NAME})
 
 ### Tests #####################################################################
 
@@ -59,7 +59,7 @@ enable_testing()
 ### Packing ###################################################################
 
 install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION lib)
-install(TARGETS ${CMAKE_PROJECT_NAME}_cli RUNTIME DESTINATION bin)
+install(TARGETS ${CMAKE_PROJECT_NAME}_server RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_CONTACT bergentroll@insiberia.net)
