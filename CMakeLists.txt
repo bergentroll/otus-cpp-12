@@ -16,6 +16,8 @@ set(SRC_PATH "src/")
 set(TEST_PATH "test/")
 include_directories("inc/")
 
+find_package(Boost 1.65 COMPONENTS asio)
+
 set(GTEST_SRCDIR "/usr/src/gtest/")
 set(GTEST_FOUND Yes)
 if(NOT EXISTS "${GTEST_SRCDIR}/CMakeLists.txt")
