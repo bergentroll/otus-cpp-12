@@ -24,13 +24,9 @@ int main(int argc, char const **argv) {
     cerr << "Exception while arguments parsion: " << e.what() << endl;
   }
 
-  try {
-    io::io_context context;
-    Server server { context, port, bulkSize };
-    context.run();
-  } catch (exception const &e) { // FIXME
-    cerr << "Exception: " << e.what() << endl;
-  }
+  io::io_context context;
+  Server server { context, port, bulkSize };
+  context.run();
 
   return 0;
 }

@@ -1,6 +1,8 @@
+#include <iostream>
 #include <server.hpp>
 
 using namespace otus;
+using namespace std;
 
 void Session::doRead() {
   auto self(shared_from_this());
@@ -8,7 +10,11 @@ void Session::doRead() {
       boost::asio::buffer(data, maxLength),
       [this, self](boost::system::error_code ec, size_t length) {
         if (!ec) {
-          async::receive(handle, data, length);
+          try {
+            async::receive(handle, data, length);
+          } catch (Parser::InvalidToken const &e) {
+            cerr << "Invalid token: " << e.what() << endl;
+          }
           doRead();
         }
       });
