@@ -34,6 +34,7 @@ find_package(Threads REQUIRED)
 add_library(
   ${CMAKE_PROJECT_NAME} SHARED
   ${SRC_PATH}/async.cpp
+  ${SRC_PATH}/get_arg.cpp
   ${SRC_PATH}/observer.cpp
   ${SRC_PATH}/parser.cpp
   ${SRC_PATH}/server.cpp
