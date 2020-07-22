@@ -7,6 +7,7 @@ addons:
     update: false
     packages:
       - libgtest-dev
+      - libboost-dev
 
 env:
   - BUILD_TYPE=Release
