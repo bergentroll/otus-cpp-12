@@ -36,6 +36,7 @@ add_library(
   ${SRC_PATH}/async.cpp
   ${SRC_PATH}/observer.cpp
   ${SRC_PATH}/parser.cpp
+  ${SRC_PATH}/server.cpp
   ${SRC_PATH}/tee_buffer.cpp
   ${SRC_PATH}/wrapper.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
