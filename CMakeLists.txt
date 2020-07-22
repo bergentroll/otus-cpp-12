@@ -16,6 +16,7 @@ set(SRC_PATH "src/")
 set(TEST_PATH "test/")
 include_directories("inc/")
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.65 COMPONENTS asio system)
 
 set(GTEST_SRCDIR "/usr/src/gtest/")
@@ -32,7 +33,7 @@ find_package(Threads REQUIRED)
 ### Main targets ##############################################################
 
 add_library(
-  ${CMAKE_PROJECT_NAME} SHARED
+  ${CMAKE_PROJECT_NAME}
   ${SRC_PATH}/async.cpp
   ${SRC_PATH}/get_arg.cpp
   ${SRC_PATH}/observer.cpp
@@ -75,7 +76,6 @@ enable_testing()
 
 ### Packing ###################################################################
 
-install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${CMAKE_PROJECT_NAME}_server RUNTIME DESTINATION bin)
 
 set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME}-server)
