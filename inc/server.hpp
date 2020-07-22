@@ -7,8 +7,7 @@
 #include <utility>
 
 namespace otus {
-  namespace io = boost::asio;
-  using tcp = io::ip::tcp;
+  using boost::asio::ip::tcp;
 
   class Session: public std::enable_shared_from_this<Session> {
   public:
@@ -30,7 +29,8 @@ namespace otus {
 
   class Server {
   public:
-    Server(io::io_context &context, int port, int bulkSize):
+    Server(boost::asio::io_service &context, int port, int bulkSize):
+    socket(context),
     acceptor(context, tcp::endpoint(tcp::v4(), port)), bulkSize(bulkSize) {
       doAccept();
     }
@@ -38,6 +38,7 @@ namespace otus {
   private:
     void doAccept();
 
+    tcp::socket socket;
     tcp::acceptor acceptor;
     int bulkSize;
   };

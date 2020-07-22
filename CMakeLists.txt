@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.4)
+cmake_minimum_required(VERSION 3.10.2)
 
 if($ENV{TRAVIS_BUILD_NUMBER})
   set(VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
@@ -16,7 +16,7 @@ set(SRC_PATH "src/")
 set(TEST_PATH "test/")
 include_directories("inc/")
 
-find_package(Boost 1.65 COMPONENTS asio)
+find_package(Boost 1.65 COMPONENTS asio system)
 
 set(GTEST_SRCDIR "/usr/src/gtest/")
 set(GTEST_FOUND Yes)
@@ -40,10 +40,16 @@ add_library(
   ${SRC_PATH}/server.cpp
   ${SRC_PATH}/tee_buffer.cpp
   ${SRC_PATH}/wrapper.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${Boost_SYSTEM_LIBRARY})
 
 add_executable(${CMAKE_PROJECT_NAME}_server ${SRC_PATH}/main.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME}_server ${CMAKE_PROJECT_NAME})
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}_server
+  ${CMAKE_PROJECT_NAME}
+  ${Boost_SYSTEM_LIBRARY})
 
 ### Tests #####################################################################
 
@@ -72,6 +78,7 @@ enable_testing()
 install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION lib)
 install(TARGETS ${CMAKE_PROJECT_NAME}_server RUNTIME DESTINATION bin)
 
+set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME}-server)
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_CONTACT bergentroll@insiberia.net)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)

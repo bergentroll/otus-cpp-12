@@ -6,8 +6,9 @@ addons:
   apt:
     update: false
     packages:
-      - libgtest-dev
       - libboost-dev
+      - libboost-system-dev
+      - libgtest-dev
 
 env:
   - BUILD_TYPE=Release

@@ -5,9 +5,9 @@
 #include "get_arg.hpp"
 #include "server.hpp"
 
-namespace io = boost::asio;
 using namespace otus;
 using namespace std;
+namespace io = boost::asio;
 
 int main(int argc, char const **argv) {
   if (argc != 3) {
@@ -24,7 +24,7 @@ int main(int argc, char const **argv) {
     cerr << "Exception while arguments parsion: " << e.what() << endl;
   }
 
-  io::io_context context;
+  io::io_service context;
   Server server { context, port, bulkSize };
   context.run();
 

@@ -22,7 +22,8 @@ void Session::doRead() {
 
 void Server::doAccept() {
   acceptor.async_accept(
-      [this](boost::system::error_code ec, tcp::socket socket) {
+      socket,
+      [this](boost::system::error_code ec) {
         if (!ec) std::make_shared<Session>(std::move(socket), bulkSize)->start();
         doAccept();
       });
